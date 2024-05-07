@@ -9,4 +9,9 @@ import {
 import { AuthGuard } from 'src/guard/auth.guard';
 
 @Controller('authen')
-export class AuthenController {}
+export class AuthenController {
+  @Get()
+  async getAuthen() {
+    throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
+  }
+}
