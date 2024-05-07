@@ -14,4 +14,9 @@ export class AuthenController {
   async getAuthen() {
     throw new HttpException('Forbidden', HttpStatus.FORBIDDEN);
   }
+
+  @Get('login')
+  async login() {
+    return 'login';
+  }
 }
