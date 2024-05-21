@@ -22,6 +22,7 @@ import { EventsModule } from './socket/socket.module';
     TypeOrmModule.forRoot({
       type: 'mysql',
       port: 3306,
+      host: '103.145.63.111',
       username: '9dgm',
       password: '9lYV5G6Tuz36K04X66CCjtAkY',
       database: 'ndsgame',
