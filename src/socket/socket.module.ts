@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
-import { UserController } from './user.controller';
+import { EventsGateway } from './socket.service';
+import { UserModule } from 'src/user/user.module';
+import { UserService } from 'src/user/user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
-import { UserService } from './user.service';
 import { RoleUser } from 'src/entities/role.entity';
 import { ServerOwn } from 'src/entities/server.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, RoleUser, ServerOwn])],
-  controllers: [UserController],
-  providers: [UserService],
+  providers: [EventsGateway, UserService],
 })
-export class UserModule {}
+export class EventsModule {}

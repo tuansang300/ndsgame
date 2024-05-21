@@ -5,8 +5,8 @@ export abstract class BaseEntity {
   id: number;
 
   @Column()
-  createdDate: Date;
+  createdDate: Date = new Date();
 
-  @Column()
+  @Column({ nullable: true })
   modifiedDate: Date;
 }

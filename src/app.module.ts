@@ -13,9 +13,12 @@ import { ListFeatureServer } from './entities/listfeatureSv.entity';
 import { Features } from './entities/feature.entity';
 import { LoggerMiddleware } from './middleware/logger';
 import { JwtModule } from '@nestjs/jwt';
+import { ManagersvModule } from './managersv/managersv.module';
+import { EventsModule } from './socket/socket.module';
 
 @Module({
   imports: [
+    EventsModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       port: 3306,
@@ -33,12 +36,14 @@ import { JwtModule } from '@nestjs/jwt';
       secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '1d' },
     }),
+    ManagersvModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}
+// export class AppModule implements NestModule {
+//   configure(consumer: MiddlewareConsumer) {
+//     consumer.apply(LoggerMiddleware).forRoutes('*');
+//   }
+// }

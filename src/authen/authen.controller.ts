@@ -5,27 +5,49 @@ import {
   HttpException,
   HttpStatus,
   Post,
+  Req,
+  Res,
+  Request,
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { AuthCredentialsDto } from 'src/dto/authen.dto';
+import { AuthenSignInDto, AuthenSignUpDto } from 'src/dto/authen.dto';
 import { AuthGuard } from 'src/guard/auth.guard';
 import { AuthenService } from './authen.service';
+import { Response } from 'express';
+import { RefreshGuard } from 'src/guard/refresh.guard';
 
 @Controller('authen')
 export class AuthenController {
   constructor(private authService: AuthenService) {}
-  @Post('/signup')
-  async signUp(
-    @Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto,
-  ): Promise<void> {
-    return this.authService.signUp(authCredentialsDto);
+  @Post('/signin')
+  async signin(
+    @Body(ValidationPipe) authenSignInDto: AuthenSignInDto,
+    @Res() res: Response,
+  ): Promise<any> {
+    const result = await this.authService.signIn(authenSignInDto);
+    res.status(HttpStatus.OK).json(result);
   }
 
-  @Post('/signin')
-  async signIn(
-    @Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ accessToken: string }> {
-    return this.authService.signIn(authCredentialsDto);
+  @Post('/signup')
+  async signup(
+    @Body(ValidationPipe) authensignupDto: AuthenSignUpDto,
+    @Res() res: Response,
+  ): Promise<any> {
+    var result = await this.authService.signUp(authensignupDto);
+    res.status(HttpStatus.OK).json({ message: result });
+  }
+
+  @Get('/user')
+  @UseGuards(AuthGuard)
+  async getUser(@Res() res: Response, @Req() req: any): Promise<any> {
+    console.log(req.user);
+    res.status(HttpStatus.OK).json({ message: 'Hello' });
+  }
+
+  @UseGuards(RefreshGuard)
+  @Post('refresh')
+  async refreshToken(@Request() req) {
+    return await this.authService.refreshToken(req.user);
   }
 }
