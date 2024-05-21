@@ -30,6 +30,7 @@ export class ManagersvService {
     currentdate.setDate(currentdate.getDate() + 30);
     serverAdd.TimeEnd = currentdate;
     serverAdd.isActive = true;
+    serverAdd.OwnUser = 1;
     await this.serverOwnRepository.save(serverAdd);
     return 'Server created successfully';
   }
