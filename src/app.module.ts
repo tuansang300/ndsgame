@@ -34,7 +34,7 @@ import { EventsModule } from './socket/socket.module';
     UserModule,
     JwtModule.register({
       global: true,
-      secret: process.env.JWT_SECRET,
+      secret: '9dsgame',
       signOptions: { expiresIn: '1d' },
     }),
     ManagersvModule,
