@@ -93,7 +93,9 @@ const typeAcction = {
   },
 };
 
-@WebSocketGateway(8888)
+const port = parseInt(process.env.PORTWSS, 10) || 8888;
+
+@WebSocketGateway(port)
 export class EventsGateway implements OnModuleInit {
   constructor(private userService: UserService) {}
   @WebSocketServer()
