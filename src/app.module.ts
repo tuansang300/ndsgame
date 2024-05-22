@@ -19,6 +19,10 @@ import { EventsModule } from './socket/socket.module';
 @Module({
   imports: [
     EventsModule,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       port: 3306,

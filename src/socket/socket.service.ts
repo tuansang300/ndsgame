@@ -1,20 +1,10 @@
-import { OnModuleInit, UseGuards } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { OnModuleInit } from '@nestjs/common';
 import {
-  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { log } from 'console';
-import { from, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Socket } from 'socket.io';
-import { ServerOwn } from 'src/entities/server.entity';
-import { User } from 'src/entities/user.entity';
-import { WsGuard } from 'src/guard/gatewaysocket.guard';
 import { UserService } from 'src/user/user.service';
-import { Repository } from 'typeorm';
 import * as WebSocket from 'ws';
 
 export class UserClient {
@@ -92,10 +82,7 @@ const typeAcction = {
     console.log(`NDServer Connected: IP: ${IPCur} `);
   },
 };
-
-const port = parseInt(process.env.PORTWSS, 10) || 8888;
-
-@WebSocketGateway(port)
+@WebSocketGateway(80)
 export class EventsGateway implements OnModuleInit {
   constructor(private userService: UserService) {}
   @WebSocketServer()
