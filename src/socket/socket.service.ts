@@ -93,7 +93,7 @@ const typeAcction = {
   },
 };
 
-@WebSocketGateway(8080)
+@WebSocketGateway(8888)
 export class EventsGateway implements OnModuleInit {
   constructor(private userService: UserService) {}
   @WebSocketServer()
