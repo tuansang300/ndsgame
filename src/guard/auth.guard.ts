@@ -24,7 +24,7 @@ export class AuthGuard implements CanActivate {
       });
       request['user'] = payload;
     } catch (e) {
-      console.error('Failed to verify token:', e.message);
+      console.error('Failed to verify token AuthGuard:', e.message);
       throw new UnauthorizedException('Invalid token');
     }
     return true;

@@ -6,6 +6,8 @@ import {
 } from '@nestjs/websockets';
 import { UserService } from 'src/user/user.service';
 import * as WebSocket from 'ws';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 
 export class UserClient {
   character: string;
@@ -82,35 +84,54 @@ const typeAcction = {
     console.log(`NDServer Connected: IP: ${IPCur} `);
   },
 };
-@WebSocketGateway(80)
+@WebSocketGateway(8888)
 export class EventsGateway implements OnModuleInit {
   constructor(private userService: UserService) {}
   @WebSocketServer()
   server: WebSocket.Server;
   connections: Connection[] = [];
 
-  private Record_Desktop(page: WebSocket, userid: string) {
+  private Record_Desktop(page: WebSocket, userid: string, status: string) {
     let isFound = false;
     const getWebPage = this.connections.find((ob) => ob.connect == page);
     if (getWebPage) {
-      console.log(getWebPage.DomainOwner);
       this.connections.forEach((connect) => {
         if (connect.Account != null) {
-          if (connect.Account.server == getWebPage.DomainOwner) {
-            const EventSend = {
-              event: 'MSG_RECORD',
-              data: {
-                delay: 100,
-              },
-            };
-            connect.connect.send(JSON.stringify(EventSend));
+          if (
+            connect.Account.server == getWebPage.DomainOwner &&
+            connect.Account.username == userid
+          ) {
+            let RecordStatus = status == 'true' ? 1 : 0;
+
+            if (RecordStatus) {
+              const EventSend = {
+                event: 'MSG_RECORD',
+                data: {
+                  delay: 100,
+                  status: 1,
+                },
+              };
+              console.log(EventSend);
+              connect.connect.send(JSON.stringify(EventSend));
+            } else {
+              const EventSend = {
+                event: 'MSG_RECORD',
+                data: {
+                  delay: 100,
+                  status: 0,
+                },
+              };
+              console.log(EventSend);
+              connect.connect.send(JSON.stringify(EventSend));
+            }
+
             isFound = true;
+            console.log(
+              status == 'true' ? 'Record Desktop Start' : 'Record Desktop Stop',
+            );
           }
         }
       });
-      if (isFound) {
-        console.log('Record Desktop Start');
-      }
     } else {
       console.log('Webpage not found');
     }
@@ -135,6 +156,48 @@ export class EventsGateway implements OnModuleInit {
     });
     if (isSend) {
       console.log('Record Desktop Send to Webpage Complete');
+    }
+  }
+
+  async createFileWithContent(
+    namecomputer: string,
+    nameServer: string,
+    content: string,
+  ): Promise<void> {
+    const Time = new Date();
+    console.log('Creating file...');
+    const now = new Date();
+    const formattedDate = [
+      String(now.getSeconds()).padStart(2, '0'),
+      String(now.getMinutes()).padStart(2, '0'),
+      String(now.getHours()).padStart(2, '0'),
+      String(now.getDate()).padStart(2, '0'),
+      String(now.getMonth() + 1).padStart(2, '0'), // Tháng tính từ 0 nên cần cộng thêm 1
+      now.getFullYear(),
+    ].join('');
+    try {
+      const currentpath = process.cwd();
+      const pathFolder = path.join(
+        currentpath,
+        'public',
+        nameServer,
+        namecomputer,
+        now.getFullYear().toString(),
+        (now.getMonth() + 1).toString(),
+      );
+      const fileName = `${formattedDate}.jpg`;
+      const filePath = path.join(pathFolder, fileName);
+
+      // Đảm bảo rằng thư mục cha tồn tại
+      await fs.ensureDir(pathFolder);
+
+      const bufferContent = Buffer.from(content, 'base64');
+      await fs.promises.writeFile(filePath, bufferContent);
+
+      console.log(`File ${formattedDate} created successfully.`);
+    } catch (error) {
+      console.error(`Error creating file ${formattedDate}: ${error}`);
+      throw error;
     }
   }
 
@@ -174,6 +237,7 @@ export class EventsGateway implements OnModuleInit {
           if (getDomain) {
             connect.DomainOwner = getDomain;
             connect.type = 2;
+            console.log(data?.userid, getDomain);
           }
           console.log('Update Information Web Complete');
           break;
@@ -189,6 +253,11 @@ export class EventsGateway implements OnModuleInit {
     let Users: UserClient[] = [];
     this.connections.forEach((connect) => {
       if (connect.Account != null) {
+        console.log(
+          connect.Account.server,
+          connect.Account?.username,
+          getWebPage.DomainOwner,
+        );
         if (connect.Account.server == getWebPage.DomainOwner) {
           let getUser = new UserClient(
             connect.Account.username,
@@ -222,7 +291,7 @@ export class EventsGateway implements OnModuleInit {
      */
     switch (data?.msg) {
       case 'MSG_RECORD':
-        this.Record_Desktop(wsconnect, data?.userid);
+        this.Record_Desktop(wsconnect, data?.userid, data?.status);
         break;
       case 'MSG_LISTUSER':
         this.ListUserIN(wsconnect);
@@ -239,6 +308,13 @@ export class EventsGateway implements OnModuleInit {
     switch (data?.msg) {
       case 'RMSG_RECORD':
         this.Record_DesktoptoWeb(wsconnect, data.img);
+        break;
+      case 'RMSG_TAKESCREENSHOT':
+        this.createFileWithContent(
+          data?.nameComputer,
+          data?.nameServer,
+          data.img,
+        );
         break;
       case 'MSG_INVENTORY':
         break;

@@ -17,7 +17,7 @@ export class RefreshGuard implements CanActivate {
       });
       request['user'] = payload;
     } catch (e) {
-      console.error('Failed to verify token:', e.message);
+      console.error('Failed to verify token RefreshGuard:', e.message);
       throw new UnauthorizedException('Invalid token refresh');
     }
     return true;
